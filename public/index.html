@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello World</title>
+  </head>
+  <body>
+    <h1>Hello World</h1>
+    <form id="hello-form">
+      <label for="name">Enter your name:</label>
+      <input type="text" id="name" name="name">
+      <button type="submit">Submit</button>
+    </form>
+    <div id="hello-message"></div>
+    <script>
+      // Select elements
+      const form = document.getElementById('hello-form');
+      const message = document.getElementById('hello-message');
+      const urlParams = new URLSearchParams(window.location.search);
+      const baseUrl = 'https//:localhost:3000/'
+      
+      // Handle error messages
+      async function handleErrors() {
+        event.preventDefault();
+        const res = await fetch(baseUrl + '/hello', {
+          method: 'GET',
+        });
+        }
+        if (urlParams.has('error')) {
+          message.textContent = 'Please enter a name';
+        } 
+        if (urlParams.has('toolong')) {
+          message.textContent = 'Name is too long';
+        }
+        if (urlParams.has('notValid')) {
+          message.textContent = 'Please enter at least one non-numeric character';
+        }
+
+      // Handle form submission
+      async function handleSubmit(event) {
+        event.preventDefault();
+        const name = form.elements.name.value.trim();
+
+        if (!name) {
+          window.location.href = '/?error';
+          return;
+
+        } if (name.length > 50) {
+          window.location.href = '/?toolong';
+          return;
+
+        } if (/^\d+$/.test(name)) {
+          window.location.href = '/?notValid';
+          return;
+        }
+
+        const response = await fetch('/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name })
+        });
+        const data = await response.text();
+        message.textContent = data;
+        window.history.pushState(null, null, '/hello');
+      }
+
+      // Attach event listener
+      form.addEventListener('submit', handleSubmit);
+
+      document.addEventListener('submit', async (event) => {
+          if (event.target === form) {
+            handleSubmit(event);
+          }
+      })
+
+      // Call handleErrors function
+      handleErrors();
+    </script>
+  </body>
+</html>
